@@ -1,0 +1,12 @@
+version: "0.0.1"
+
+container:
+  name: pangolin
+
+rootAccount:
+  email: "webmaster@brys.dev"
+  password: ${TUPAI_ROOT_PASSWORD} # ENV template support
+
+api:
+  url: https://pangolin.brys.me
+  createApiKey: true
