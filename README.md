@@ -2,7 +2,7 @@
 
 Represent your entire Pangolin configuration as code. From first time setup, to creating orgs, and adding sites.
 
-### Project Timeline
+### Project Milestones
 - [ ] Bootstrap Pangolin
   - [x] Root Account Creation via Config
   - [ ] Orginization Creation via Config
