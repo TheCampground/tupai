@@ -1,0 +1,12 @@
+version: "0.0.1"
+
+container:
+  name: pangolin
+
+rootAccount:
+  email: "webmaster@example.com"
+  password: "t#st%pa$wOrd1"
+
+api:
+  url: https://pangolin.brys.me
+  createApiKey: true
