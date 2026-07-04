@@ -1,0 +1,18 @@
+version: "0.0.1"
+
+container:
+  name: pangolin
+
+rootAccount:
+  email: "webmaster@brys.dev"
+  password: "super-secret" # ENV template support
+
+organizations:
+  - id: "thecampground"
+    name: "The Campground"
+    subnet: "100.90.128.0/20"
+    utility: "100.96.128.0/20"
+
+api:
+  url: https://pangolin.brys.me
+  createApiKey: true

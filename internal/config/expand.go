@@ -3,55 +3,110 @@ package config
 import (
 	"fmt"
 	"os"
+	"reflect"
 	"strings"
 )
 
-/*
-Expands ENV template strings to real values
+// Expands TupaiConfig in-place
+func (cfg *TupaiConfig) Expand() error {
+	return walkConfigRecursively(reflect.ValueOf(cfg).Elem())
+}
 
-Currently is manual config traversal
-*/
-func (cfg *BootstrapConfig) Expand() error {
-	if err := expandValue(&cfg.Version); err != nil {
-		return err
-	}
-
-	if err := expandValue(&cfg.Container.Name); err != nil {
-		return err
-	}
-
-	if err := expandValue(&cfg.RootAccount.Email); err != nil {
-		return err
-	}
-
-	if err := expandValue(&cfg.RootAccount.Password); err != nil {
-		return err
-	}
-
-	if err := expandValue(&cfg.Api.Url); err != nil {
-		return err
+func walkConfigRecursively(v reflect.Value) error {
+	switch v.Kind() {
+	case reflect.Pointer:
+		return walkPointer(v)
+	case reflect.Struct:
+		return walkStruct(v)
+	case reflect.Map:
+		return walkMap(v)
+	case reflect.Slice, reflect.Array:
+		return walkSliceOrArray(v)
+	case reflect.String:
+		return expandStringValue(v)
 	}
 
 	return nil
 }
 
-func expandValue(template_str *string) error {
-	if template_str == nil {
+func walkPointer(ptr reflect.Value) error {
+	if !ptr.IsNil() {
+		return walkConfigRecursively(ptr.Elem())
+	}
+
+	return nil
+}
+
+func walkStruct(strct reflect.Value) error {
+	for _, field := range strct.Fields() {
+		if err := walkConfigRecursively(field); err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
+func walkMap(mp reflect.Value) error {
+	for _, key := range mp.MapKeys() {
+		val := mp.MapIndex(key)
+
+		newVal := reflect.New(val.Type()).Elem()
+		newVal.Set(val)
+
+		if err := walkConfigRecursively(newVal); err != nil {
+			return err
+		}
+
+		// Potentially dangerous approach, will not work with non-str map keys
+		mp.SetMapIndex(key, newVal)
+	}
+
+	return nil
+}
+
+func walkSliceOrArray(list reflect.Value) error {
+	for i := 0; i < list.Len(); i++ {
+		if err := walkConfigRecursively(list.Index(i)); err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
+func expandStringValue(str reflect.Value) error {
+	if !str.CanSet() {
 		return nil
 	}
 
-	if !isEnvTemplateStr(*template_str) {
-		return nil
-	}
-
-	value, err := findEnvElement(stripTemplate(*template_str))
+	expandedStr, err := expandString(str.String())
 
 	if err != nil {
 		return err
 	}
 
-	*template_str = *value
+	if expandedStr == nil {
+		return nil
+	}
+
+	str.SetString(*expandedStr)
+
 	return nil
+}
+
+func expandString(str string) (*string, error) {
+	if !isEnvTemplateStr(str) {
+		return nil, nil
+	}
+
+	value, err := findEnvElement(stripTemplate(str))
+
+	if err != nil {
+		return nil, err
+	}
+
+	return value, nil
 }
 
 func stripTemplate(key string) string {

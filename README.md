@@ -5,12 +5,13 @@ Represent your entire Pangolin configuration as code. From first time setup, to 
 ### Project Milestones
 - [ ] Bootstrap Pangolin
   - [x] Root Account Creation via Config
-  - [ ] Orginization Creation via Config
+  - [x] Dynamic config env expansion via reflect api
+  - [ ] Organization Creation via Config
   - [ ] ???
 - [ ] Config seperation
   - [ ] Seperate container info into different yml
   - [ ] Seperate accounts into folder/file
-  - [ ] Seperate orginizations into folder/independent file
+  - [ ] Seperate organizations into folder/independent file
   - [ ] Seperate API logic (if there is any) into seperate file
   - [ ] ???
 - [ ] Users
